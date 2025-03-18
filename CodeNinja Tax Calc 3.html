@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeNinja Income Tax Calculator 2025</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #006400;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .calculator {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #006400;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #004d00;
+        }
+        .results {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #006400;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .result-label {
+            font-weight: 600;
+        }
+        .value {
+            font-weight: 400;
+        }
+        .tax-breakdown {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+        .info-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .tax-comparison {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: right;
+        }
+        .comparison-table th:first-child, .comparison-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        .comparison-table th {
+            background-color: #f2f2f2;
+        }
+        .highlight-row {
+            background-color: #e6f7e6;
+            font-weight: 700;
+        }
+        .highlight-row td {
+            border-top: 2px solid #006400;
+            border-bottom: 2px solid #006400;
+        }
+        .equivalent-column {
+            background-color: #f0f8ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>CodeNinja Monthly Income Tax Calculator 2025</h1>
+    <div class="calculator">
+        <div class="input-group">
+            <label for="salary">Monthly Salary Amount (PKR)</label>
+            <input type="number" id="salary" placeholder="Enter your monthly salary">
+            <p class="info-text">Note: 7% of your salary will be considered as non-taxable medical allowance</p>
+        </div>
+        <div class="input-group">
+            <label for="fuel-allowance">Fuel Allowance (PKR, Optional)</label>
+            <input type="number" id="fuel-allowance" min="0" max="50000" placeholder="Enter fuel allowance (max 50,000)">
+            <p class="info-text">If provided, this amount will be treated as non-taxable income</p>
+        </div>
+        <!-- Tax category dropdown removed as requested -->
+        <button id="calculate-btn">Calculate Tax</button>
+        
+        <div id="results" class="results hidden">
+            <h3>Tax Calculation Results</h3>
+            <h4>Annual Breakdown</h4>
+            <div class="result-row">
+                <span class="result-label">Annual Gross Salary:</span>
+                <span id="gross-salary" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Annual Medical Allowance (7%):</span>
+                <span id="medical-allowance" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Annual Fuel Allowance:</span>
+                <span id="fuel-allowance-annual" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Annual Taxable Income:</span>
+                <span id="taxable-income" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Annual Tax:</span>
+                <span id="total-tax" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Average Tax Rate:</span>
+                <span id="tax-rate" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Annual Net Salary After Tax:</span>
+                <span id="net-salary" class="value"></span>
+            </div>
+            
+            <h4 class="mt-4">Monthly Breakdown</h4>
+            <div class="result-row">
+                <span class="result-label">Monthly Gross Salary:</span>
+                <span id="monthly-gross-salary" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Monthly Medical Allowance (7%):</span>
+                <span id="monthly-medical-allowance" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Monthly Fuel Allowance:</span>
+                <span id="monthly-fuel-allowance" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Monthly Taxable Income:</span>
+                <span id="monthly-taxable-income" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Monthly Tax:</span>
+                <span id="monthly-tax" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Monthly Net Salary After Tax:</span>
+                <span id="monthly-net-salary" class="value"></span>
+            </div>
+            
+            <div class="tax-breakdown">
+                <h4>Tax Breakdown</h4>
+                <div id="tax-breakdown-details"></div>
+            </div>
+            
+            <div id="tax-comparison" class="tax-comparison hidden">
+                <h4>Tax Comparison</h4>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>With Fuel Allowance</th>
+                            <th>Without Fuel Allowance</th>
+                            <th>Difference</th>
+                            <th class="equivalent-column">Equivalent Salary*</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Monthly Gross Salary</td>
+                            <td id="comp-gross-with"></td>
+                            <td id="comp-gross-without"></td>
+                            <td id="comp-gross-diff"></td>
+                            <td id="comp-gross-equivalent" class="equivalent-column"></td>
+                        </tr>
+                        <tr>
+                            <td>Monthly Medical Allowance</td>
+                            <td id="comp-medical-with"></td>
+                            <td id="comp-medical-without"></td>
+                            <td id="comp-medical-diff"></td>
+                            <td id="comp-medical-equivalent" class="equivalent-column"></td>
+                        </tr>
+                        <tr>
+                            <td>Monthly Fuel Allowance</td>
+                            <td id="comp-fuel-with"></td>
+                            <td id="comp-fuel-without"></td>
+                            <td id="comp-fuel-diff"></td>
+                            <td id="comp-fuel-equivalent" class="equivalent-column"></td>
+                        </tr>
+                        <tr>
+                            <td>Monthly Taxable Income</td>
+                            <td id="comp-taxable-with"></td>
+                            <td id="comp-taxable-without"></td>
+                            <td id="comp-taxable-diff"></td>
+                            <td id="comp-taxable-equivalent" class="equivalent-column"></td>
+                        </tr>
+                        <tr>
+                            <td>Monthly Tax</td>
+                            <td id="comp-tax-with"></td>
+                            <td id="comp-tax-without"></td>
+                            <td id="comp-tax-diff"></td>
+                            <td id="comp-tax-equivalent" class="equivalent-column"></td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td>Monthly Net Salary</td>
+                            <td id="comp-net-with"></td>
+                            <td id="comp-net-without"></td>
+                            <td id="comp-net-diff"></td>
+                            <td id="comp-net-equivalent" class="equivalent-column"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="info-text">*Equivalent Salary: The salary needed (without fuel allowance) to achieve the same net salary as with fuel allowance.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculate-btn').addEventListener('click', calculateTax);
+
+        function calculateTax() {
+            // Get input values
+            let monthlySalary = parseFloat(document.getElementById('salary').value);
+            let monthlyFuelAllowance = parseFloat(document.getElementById('fuel-allowance').value) || 0;
+            
+            // Validate input
+            if (isNaN(monthlySalary) || monthlySalary <= 0) {
+                alert("Please enter a valid monthly salary amount.");
+                return;
+            }
+            
+            // Cap fuel allowance at 50,000
+            if (monthlyFuelAllowance > 50000) {
+                monthlyFuelAllowance = 50000;
+                document.getElementById('fuel-allowance').value = 50000;
+            }
+
+            // Calculate annual values
+            const annualSalary = monthlySalary * 12;
+            
+            // Calculate medical allowance (7% of salary)
+            const monthlyMedicalAllowance = monthlySalary * 0.07;
+            const medicalAllowance = monthlyMedicalAllowance * 12;
+            
+            // Calculate annual fuel allowance
+            const annualFuelAllowance = monthlyFuelAllowance * 12;
+            
+            // Calculate taxable income after deducting allowances
+            const monthlyTaxableIncome = monthlySalary - monthlyMedicalAllowance - monthlyFuelAllowance;
+            const taxableIncome = monthlyTaxableIncome * 12;
+            
+            // Calculate tax (always salaried)
+            let tax = 0;
+            let taxBreakdown = [];
+            
+            tax = calculateSalariedTax(taxableIncome, taxBreakdown);
+            const monthlyTax = tax / 12;
+            
+            // Calculate tax without fuel allowance for comparison
+            const taxableIncomeWithoutFuel = annualSalary - medicalAllowance;
+            let taxWithoutFuel = 0;
+            let taxBreakdownWithoutFuel = [];
+            
+            taxWithoutFuel = calculateSalariedTax(taxableIncomeWithoutFuel, taxBreakdownWithoutFuel);
+            const monthlyTaxWithoutFuel = taxWithoutFuel / 12;
+            
+            // Display annual results
+            document.getElementById('gross-salary').textContent = formatCurrency(annualSalary);
+            document.getElementById('medical-allowance').textContent = formatCurrency(medicalAllowance);
+            document.getElementById('fuel-allowance-annual').textContent = formatCurrency(annualFuelAllowance);
+            document.getElementById('taxable-income').textContent = formatCurrency(taxableIncome);
+            document.getElementById('total-tax').textContent = formatCurrency(tax);
+            document.getElementById('tax-rate').textContent = ((tax / annualSalary) * 100).toFixed(2) + '%';
+            document.getElementById('net-salary').textContent = formatCurrency(annualSalary - tax);
+            
+            // Display monthly results
+            document.getElementById('monthly-gross-salary').textContent = formatCurrency(monthlySalary);
+            document.getElementById('monthly-medical-allowance').textContent = formatCurrency(monthlyMedicalAllowance);
+            document.getElementById('monthly-fuel-allowance').textContent = formatCurrency(monthlyFuelAllowance);
+            document.getElementById('monthly-taxable-income').textContent = formatCurrency(monthlyTaxableIncome);
+            document.getElementById('monthly-tax').textContent = formatCurrency(monthlyTax);
+            document.getElementById('monthly-net-salary').textContent = formatCurrency(monthlySalary - monthlyTax);
+            
+            // Show tax breakdown
+            const breakdownHTML = taxBreakdown.map(item => 
+                `<div class="result-row">
+                    <span class="result-label">${item.label}</span>
+                    <span class="value">${formatCurrency(item.amount)}</span>
+                </div>`
+            ).join('');
+            
+            document.getElementById('tax-breakdown-details').innerHTML = breakdownHTML;
+            
+            // Display tax comparison if fuel allowance is provided
+            if (monthlyFuelAllowance > 0) {
+                // With fuel allowance
+                document.getElementById('comp-gross-with').textContent = formatCurrency(monthlySalary);
+                document.getElementById('comp-medical-with').textContent = formatCurrency(monthlyMedicalAllowance);
+                document.getElementById('comp-fuel-with').textContent = formatCurrency(monthlyFuelAllowance);
+                document.getElementById('comp-taxable-with').textContent = formatCurrency(monthlyTaxableIncome);
+                document.getElementById('comp-tax-with').textContent = formatCurrency(monthlyTax);
+                document.getElementById('comp-net-with').textContent = formatCurrency(monthlySalary - monthlyTax);
+                
+                // Without fuel allowance
+                const monthlyTaxableIncomeWithoutFuel = monthlySalary - monthlyMedicalAllowance;
+                const taxableIncomeWithoutFuel = monthlyTaxableIncomeWithoutFuel * 12;
+                const taxWithoutFuel = calculateSalariedTax(taxableIncomeWithoutFuel, taxBreakdownWithoutFuel);
+                const monthlyTaxWithoutFuel = taxWithoutFuel / 12;
+                
+                document.getElementById('comp-gross-without').textContent = formatCurrency(monthlySalary);
+                document.getElementById('comp-medical-without').textContent = formatCurrency(monthlyMedicalAllowance);
+                document.getElementById('comp-fuel-without').textContent = formatCurrency(0);
+                document.getElementById('comp-taxable-without').textContent = formatCurrency(monthlyTaxableIncomeWithoutFuel);
+                document.getElementById('comp-tax-without').textContent = formatCurrency(monthlyTaxWithoutFuel);
+                document.getElementById('comp-net-without').textContent = formatCurrency(monthlySalary - monthlyTaxWithoutFuel);
+                
+                // Calculate differences
+                document.getElementById('comp-gross-diff').textContent = formatCurrency(0);
+                document.getElementById('comp-medical-diff').textContent = formatCurrency(0);
+                document.getElementById('comp-fuel-diff').textContent = formatCurrency(monthlyFuelAllowance);
+                document.getElementById('comp-taxable-diff').textContent = formatCurrency(monthlyTaxableIncome - monthlyTaxableIncomeWithoutFuel);
+                document.getElementById('comp-tax-diff').textContent = formatCurrency(monthlyTax - monthlyTaxWithoutFuel);
+                document.getElementById('comp-net-diff').textContent = formatCurrency((monthlySalary - monthlyTax) - (monthlySalary - monthlyTaxWithoutFuel));
+                
+                // Calculate equivalent salary (to get same net salary without fuel allowance)
+                const targetNetSalary = monthlySalary - monthlyTax; // net salary with fuel allowance
+                const equivalentGrossSalary = calculateEquivalentSalary(targetNetSalary);
+                const equivalentMedicalAllowance = equivalentGrossSalary * 0.07;
+                const equivalentTaxableIncome = equivalentGrossSalary - equivalentMedicalAllowance;
+                const equivalentAnnualTaxableIncome = equivalentTaxableIncome * 12;
+                const equivalentTax = calculateSalariedTax(equivalentAnnualTaxableIncome, []) / 12;
+                const equivalentNetSalary = equivalentGrossSalary - equivalentTax;
+                
+                // Display equivalent salary info
+                document.getElementById('comp-gross-equivalent').textContent = formatCurrency(equivalentGrossSalary);
+                document.getElementById('comp-medical-equivalent').textContent = formatCurrency(equivalentMedicalAllowance);
+                document.getElementById('comp-fuel-equivalent').textContent = formatCurrency(0);
+                document.getElementById('comp-taxable-equivalent').textContent = formatCurrency(equivalentTaxableIncome);
+                document.getElementById('comp-tax-equivalent').textContent = formatCurrency(equivalentTax);
+                document.getElementById('comp-net-equivalent').textContent = formatCurrency(equivalentNetSalary);
+                
+                // Show comparison section
+                document.getElementById('tax-comparison').classList.remove('hidden');
+            } else {
+                // Hide comparison section if no fuel allowance
+                document.getElementById('tax-comparison').classList.add('hidden');
+            }
+            
+            // Show results
+            document.getElementById('results').classList.remove('hidden');
+        }
+        
+        // Function to calculate equivalent salary needed without fuel allowance
+        function calculateEquivalentSalary(targetNetSalary) {
+            // Use binary search to find the equivalent gross salary
+            let low = targetNetSalary; // Minimum possible gross (if tax was 0)
+            let high = targetNetSalary * 2; // Maximum possible gross (arbitrary upper bound)
+            let bestMatch = low;
+            let bestDiff = Number.MAX_VALUE;
+            
+            // Binary search with 20 iterations for high precision
+            for (let i = 0; i < 25; i++) {
+                const mid = (low + high) / 2;
+                const medicalAllowance = mid * 0.07;
+                const taxableIncome = mid - medicalAllowance;
+                const annualTaxableIncome = taxableIncome * 12;
+                const tax = calculateSalariedTax(annualTaxableIncome, []) / 12;
+                const netSalary = mid - tax;
+                
+                const diff = Math.abs(netSalary - targetNetSalary);
+                
+                // Track best match found so far
+                if (diff < bestDiff) {
+                    bestDiff = diff;
+                    bestMatch = mid;
+                }
+                
+                if (Math.abs(netSalary - targetNetSalary) < 0.01) {
+                    // We found a very close match, stop here
+                    return mid;
+                }
+                
+                if (netSalary < targetNetSalary) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+            
+            return bestMatch;
+        }
+        
+        // Function to calculate tax for salaried individuals based on Pakistan's 2024-2025 tax brackets
+        function calculateSalariedTax(taxableIncome, taxBreakdown) {
+            // Salaried Tax slabs for Pakistan 2024-2025
+            const taxSlabs = [
+                { limit: 600000, rate: 0, fixedAmount: 0 },
+                { limit: 1200000, rate: 5, fixedAmount: 0 },
+                { limit: 2200000, rate: 15, fixedAmount: 30000 },
+                { limit: 3200000, rate: 25, fixedAmount: 180000 },
+                { limit: 4100000, rate: 30, fixedAmount: 430000 },
+                { limit: Infinity, rate: 35, fixedAmount: 700000 }
+            ];
+            
+            let tax = 0;
+            let remainingIncome = taxableIncome;
+            
+            // If income is below the minimum taxable threshold
+            if (taxableIncome <= taxSlabs[0].limit) {
+                if (taxBreakdown.length > 0) {
+                    taxBreakdown.push({
+                        label: `No Tax (Income up to ${formatCurrency(taxSlabs[0].limit)})`,
+                        amount: 0
+                    });
+                }
+                return 0;
+            }
+            
+            // Calculate tax based on slabs
+            for (let i = 1; i < taxSlabs.length; i++) {
+                const prevLimit = taxSlabs[i-1].limit;
+                const currLimit = taxSlabs[i].limit;
+                
+                if (taxableIncome > prevLimit) {
+                    if (taxableIncome <= currLimit) {
+                        // Last applicable slab
+                        tax = taxSlabs[i].fixedAmount + ((taxableIncome - prevLimit) * taxSlabs[i].rate / 100);
+                        
+                        if (taxBreakdown.length > 0) {
+                            taxBreakdown.push({
+                                label: `Fixed Tax for income up to ${formatCurrency(prevLimit)}`,
+                                amount: taxSlabs[i].fixedAmount
+                            });
+                            
+                            taxBreakdown.push({
+                                label: `${taxSlabs[i].rate}% on income from ${formatCurrency(prevLimit)} to ${formatCurrency(taxableIncome)}`,
+                                amount: (taxableIncome - prevLimit) * taxSlabs[i].rate / 100
+                            });
+                        }
+                        
+                        break;
+                    } else if (i < taxSlabs.length - 1) {
+                        // Intermediate slab
+                        const slabAmount = (currLimit - prevLimit) * taxSlabs[i].rate / 100;
+                        
+                        // Only add to breakdown if we're on an applicable slab and we're recording breakdown
+                        if (taxBreakdown.length > 0) {
+                            taxBreakdown.push({
+                                label: `${taxSlabs[i].rate}% on income from ${formatCurrency(prevLimit)} to ${formatCurrency(currLimit)}`,
+                                amount: slabAmount
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // If income exceeds the highest explicit slab
+            if (taxableIncome > taxSlabs[taxSlabs.length - 2].limit) {
+                const highestSlab = taxSlabs[taxSlabs.length - 1];
+                const prevLimit = taxSlabs[taxSlabs.length - 2].limit;
+                
+                tax = highestSlab.fixedAmount + ((taxableIncome - prevLimit) * highestSlab.rate / 100);
+                
+                if (taxBreakdown.length > 0) {
+                    taxBreakdown.push({
+                        label: `Fixed Tax for income up to ${formatCurrency(prevLimit)}`,
+                        amount: highestSlab.fixedAmount
+                    });
+                    
+                    taxBreakdown.push({
+                        label: `${highestSlab.rate}% on income above ${formatCurrency(prevLimit)}`,
+                        amount: (taxableIncome - prevLimit) * highestSlab.rate / 100
+                    });
+                }
+            }
+            
+            return tax;
+        }
+        
+        // Format currency as PKR with commas
+        function formatCurrency(amount) {
+            return 'PKR ' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+    </script>
+</body>
+</html>
