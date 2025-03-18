@@ -119,6 +119,48 @@
         .equivalent-column {
             background-color: #f0f8ff;
         }
+        .expense-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+        }
+        .expense-input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .expense-input-row input {
+            flex: 1;
+        }
+        .expense-input-row button {
+            width: auto;
+            margin-top: 0;
+        }
+        .expense-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background-color: white;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .expense-item button {
+            background-color: #ff4d4d;
+            padding: 2px 8px;
+            margin: 0;
+            width: auto;
+        }
+        .expense-total {
+            font-weight: 600;
+            margin-top: 10px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -134,7 +176,35 @@
             <input type="number" id="fuel-allowance" min="0" max="50000" placeholder="Enter fuel allowance (max 50,000)">
             <p class="info-text">If provided, this amount will be treated as non-taxable income</p>
         </div>
-        <!-- Tax category dropdown removed as requested -->
+        <!-- New PF option -->
+        <div class="input-group">
+            <label for="pf-contribution">Provident Fund Contribution</label>
+            <select id="pf-contribution">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+            <p class="info-text">If yes, 5% of base salary (70% of total salary) will be contributed by you and matched by the company</p>
+        </div>
+        
+        <div class="expense-section">
+            <h4>Custom Employee Expenses</h4>
+            <p class="info-text">Add any custom expenses (society fees, cricket match fees, etc.)</p>
+            
+            <div class="expense-input-row">
+                <input type="text" id="expense-name" placeholder="Expense name">
+                <input type="number" id="expense-amount" placeholder="Amount (PKR)">
+                <button id="add-expense-btn">Add</button>
+            </div>
+            
+            <div class="expense-list" id="expense-list">
+                <!-- Expenses will be listed here -->
+            </div>
+            
+            <div class="expense-total">
+                Total Expenses: <span id="expense-total">PKR 0.00</span>
+            </div>
+        </div>
+        
         <button id="calculate-btn">Calculate Tax</button>
         
         <div id="results" class="results hidden">
@@ -145,12 +215,28 @@
                 <span id="gross-salary" class="value"></span>
             </div>
             <div class="result-row">
+                <span class="result-label">Annual Base Salary (70%):</span>
+                <span id="base-salary" class="value"></span>
+            </div>
+            <div class="result-row">
                 <span class="result-label">Annual Medical Allowance (7%):</span>
                 <span id="medical-allowance" class="value"></span>
             </div>
             <div class="result-row">
                 <span class="result-label">Annual Fuel Allowance:</span>
                 <span id="fuel-allowance-annual" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Annual Employee PF Contribution (5% of Base):</span>
+                <span id="employee-pf" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Annual Company PF Contribution (5% of Base):</span>
+                <span id="company-pf" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Annual Custom Expenses:</span>
+                <span id="annual-expenses" class="value"></span>
             </div>
             <div class="result-row">
                 <span class="result-label">Annual Taxable Income:</span>
@@ -168,11 +254,19 @@
                 <span class="result-label">Annual Net Salary After Tax:</span>
                 <span id="net-salary" class="value"></span>
             </div>
+            <div class="result-row">
+                <span class="result-label">Total Annual PF (Employee + Company):</span>
+                <span id="total-pf" class="value"></span>
+            </div>
             
             <h4 class="mt-4">Monthly Breakdown</h4>
             <div class="result-row">
                 <span class="result-label">Monthly Gross Salary:</span>
                 <span id="monthly-gross-salary" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Monthly Base Salary (70%):</span>
+                <span id="monthly-base-salary" class="value"></span>
             </div>
             <div class="result-row">
                 <span class="result-label">Monthly Medical Allowance (7%):</span>
@@ -181,6 +275,18 @@
             <div class="result-row">
                 <span class="result-label">Monthly Fuel Allowance:</span>
                 <span id="monthly-fuel-allowance" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Monthly Employee PF Contribution:</span>
+                <span id="monthly-employee-pf" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Monthly Company PF Contribution:</span>
+                <span id="monthly-company-pf" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Monthly Custom Expenses:</span>
+                <span id="monthly-expenses" class="value"></span>
             </div>
             <div class="result-row">
                 <span class="result-label">Monthly Taxable Income:</span>
@@ -193,6 +299,10 @@
             <div class="result-row">
                 <span class="result-label">Monthly Net Salary After Tax:</span>
                 <span id="monthly-net-salary" class="value"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Total Monthly PF (Employee + Company):</span>
+                <span id="monthly-total-pf" class="value"></span>
             </div>
             
             <div class="tax-breakdown">
@@ -221,6 +331,13 @@
                             <td id="comp-gross-equivalent" class="equivalent-column"></td>
                         </tr>
                         <tr>
+                            <td>Monthly Base Salary</td>
+                            <td id="comp-base-with"></td>
+                            <td id="comp-base-without"></td>
+                            <td id="comp-base-diff"></td>
+                            <td id="comp-base-equivalent" class="equivalent-column"></td>
+                        </tr>
+                        <tr>
                             <td>Monthly Medical Allowance</td>
                             <td id="comp-medical-with"></td>
                             <td id="comp-medical-without"></td>
@@ -233,6 +350,20 @@
                             <td id="comp-fuel-without"></td>
                             <td id="comp-fuel-diff"></td>
                             <td id="comp-fuel-equivalent" class="equivalent-column"></td>
+                        </tr>
+                        <tr>
+                            <td>Monthly Employee PF</td>
+                            <td id="comp-pf-with"></td>
+                            <td id="comp-pf-without"></td>
+                            <td id="comp-pf-diff"></td>
+                            <td id="comp-pf-equivalent" class="equivalent-column"></td>
+                        </tr>
+                        <tr>
+                            <td>Monthly Custom Expenses</td>
+                            <td id="comp-expenses-with"></td>
+                            <td id="comp-expenses-without"></td>
+                            <td id="comp-expenses-diff"></td>
+                            <td id="comp-expenses-equivalent" class="equivalent-column"></td>
                         </tr>
                         <tr>
                             <td>Monthly Taxable Income</td>
@@ -255,6 +386,13 @@
                             <td id="comp-net-diff"></td>
                             <td id="comp-net-equivalent" class="equivalent-column"></td>
                         </tr>
+                        <tr>
+                            <td>Total Monthly PF</td>
+                            <td id="comp-total-pf-with"></td>
+                            <td id="comp-total-pf-without"></td>
+                            <td id="comp-total-pf-diff"></td>
+                            <td id="comp-total-pf-equivalent" class="equivalent-column"></td>
+                        </tr>
                     </tbody>
                 </table>
                 <p class="info-text">*Equivalent Salary: The salary needed (without fuel allowance) to achieve the same net salary as with fuel allowance.</p>
@@ -263,12 +401,83 @@
     </div>
 
     <script>
+        // Initialize expenses array
+        let expenses = [];
+        let totalExpenseAmount = 0;
+
+        // Add event listeners
         document.getElementById('calculate-btn').addEventListener('click', calculateTax);
+        document.getElementById('add-expense-btn').addEventListener('click', addExpense);
+
+        // Function to add a new expense
+        function addExpense() {
+            const name = document.getElementById('expense-name').value.trim();
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            
+            if (!name) {
+                alert("Please enter an expense name");
+                return;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid expense amount");
+                return;
+            }
+            
+            // Add expense to array
+            const expense = {
+                id: Date.now(), // Generate unique ID based on timestamp
+                name: name,
+                amount: amount
+            };
+            
+            expenses.push(expense);
+            
+            // Update UI
+            updateExpenseList();
+            
+            // Clear inputs
+            document.getElementById('expense-name').value = '';
+            document.getElementById('expense-amount').value = '';
+        }
+        
+        // Function to remove an expense
+        function removeExpense(id) {
+            expenses = expenses.filter(expense => expense.id !== id);
+            updateExpenseList();
+        }
+        
+        // Function to update the expense list UI
+        function updateExpenseList() {
+            const expenseList = document.getElementById('expense-list');
+            expenseList.innerHTML = '';
+            
+            totalExpenseAmount = 0;
+            
+            expenses.forEach(expense => {
+                totalExpenseAmount += expense.amount;
+                
+                const expenseItem = document.createElement('div');
+                expenseItem.className = 'expense-item';
+                expenseItem.innerHTML = `
+                    <div>${expense.name}</div>
+                    <div>
+                        <span>${formatCurrency(expense.amount)}</span>
+                        <button onclick="removeExpense(${expense.id})">×</button>
+                    </div>
+                `;
+                
+                expenseList.appendChild(expenseItem);
+            });
+            
+            document.getElementById('expense-total').textContent = formatCurrency(totalExpenseAmount);
+        }
 
         function calculateTax() {
             // Get input values
             let monthlySalary = parseFloat(document.getElementById('salary').value);
             let monthlyFuelAllowance = parseFloat(document.getElementById('fuel-allowance').value) || 0;
+            let includePF = document.getElementById('pf-contribution').value === 'yes';
             
             // Validate input
             if (isNaN(monthlySalary) || monthlySalary <= 0) {
@@ -285,6 +494,10 @@
             // Calculate annual values
             const annualSalary = monthlySalary * 12;
             
+            // Calculate base salary (70% of total)
+            const monthlyBaseSalary = monthlySalary * 0.7;
+            const annualBaseSalary = monthlyBaseSalary * 12;
+            
             // Calculate medical allowance (7% of salary)
             const monthlyMedicalAllowance = monthlySalary * 0.07;
             const medicalAllowance = monthlyMedicalAllowance * 12;
@@ -292,8 +505,26 @@
             // Calculate annual fuel allowance
             const annualFuelAllowance = monthlyFuelAllowance * 12;
             
-            // Calculate taxable income after deducting allowances
-            const monthlyTaxableIncome = monthlySalary - monthlyMedicalAllowance - monthlyFuelAllowance;
+            // Calculate Provident Fund contributions
+            let monthlyEmployeePF = 0;
+            let monthlyCompanyPF = 0;
+            
+            if (includePF) {
+                monthlyEmployeePF = monthlyBaseSalary * 0.05;
+                monthlyCompanyPF = monthlyBaseSalary * 0.05;
+            }
+            
+            const annualEmployeePF = monthlyEmployeePF * 12;
+            const annualCompanyPF = monthlyCompanyPF * 12;
+            const monthlyTotalPF = monthlyEmployeePF + monthlyCompanyPF;
+            const annualTotalPF = annualEmployeePF + annualCompanyPF;
+            
+            // Get monthly and annual custom expenses
+            const monthlyCustomExpenses = totalExpenseAmount;
+            const annualCustomExpenses = monthlyCustomExpenses * 12;
+            
+            // Calculate taxable income after deducting allowances, PF, and custom expenses
+            const monthlyTaxableIncome = monthlySalary - monthlyMedicalAllowance - monthlyFuelAllowance - monthlyEmployeePF - monthlyCustomExpenses;
             const taxableIncome = monthlyTaxableIncome * 12;
             
             // Calculate tax (always salaried)
@@ -304,7 +535,7 @@
             const monthlyTax = tax / 12;
             
             // Calculate tax without fuel allowance for comparison
-            const taxableIncomeWithoutFuel = annualSalary - medicalAllowance;
+            const taxableIncomeWithoutFuel = annualSalary - medicalAllowance - (includePF ? annualEmployeePF : 0) - annualCustomExpenses;
             let taxWithoutFuel = 0;
             let taxBreakdownWithoutFuel = [];
             
@@ -313,20 +544,30 @@
             
             // Display annual results
             document.getElementById('gross-salary').textContent = formatCurrency(annualSalary);
+            document.getElementById('base-salary').textContent = formatCurrency(annualBaseSalary);
             document.getElementById('medical-allowance').textContent = formatCurrency(medicalAllowance);
             document.getElementById('fuel-allowance-annual').textContent = formatCurrency(annualFuelAllowance);
+            document.getElementById('employee-pf').textContent = formatCurrency(annualEmployeePF);
+            document.getElementById('company-pf').textContent = formatCurrency(annualCompanyPF);
+            document.getElementById('annual-expenses').textContent = formatCurrency(annualCustomExpenses);
             document.getElementById('taxable-income').textContent = formatCurrency(taxableIncome);
             document.getElementById('total-tax').textContent = formatCurrency(tax);
             document.getElementById('tax-rate').textContent = ((tax / annualSalary) * 100).toFixed(2) + '%';
-            document.getElementById('net-salary').textContent = formatCurrency(annualSalary - tax);
+            document.getElementById('net-salary').textContent = formatCurrency(annualSalary - tax - annualEmployeePF - annualCustomExpenses);
+            document.getElementById('total-pf').textContent = formatCurrency(annualTotalPF);
             
             // Display monthly results
             document.getElementById('monthly-gross-salary').textContent = formatCurrency(monthlySalary);
+            document.getElementById('monthly-base-salary').textContent = formatCurrency(monthlyBaseSalary);
             document.getElementById('monthly-medical-allowance').textContent = formatCurrency(monthlyMedicalAllowance);
             document.getElementById('monthly-fuel-allowance').textContent = formatCurrency(monthlyFuelAllowance);
+            document.getElementById('monthly-employee-pf').textContent = formatCurrency(monthlyEmployeePF);
+            document.getElementById('monthly-company-pf').textContent = formatCurrency(monthlyCompanyPF);
+            document.getElementById('monthly-expenses').textContent = formatCurrency(monthlyCustomExpenses);
             document.getElementById('monthly-taxable-income').textContent = formatCurrency(monthlyTaxableIncome);
             document.getElementById('monthly-tax').textContent = formatCurrency(monthlyTax);
-            document.getElementById('monthly-net-salary').textContent = formatCurrency(monthlySalary - monthlyTax);
+            document.getElementById('monthly-net-salary').textContent = formatCurrency(monthlySalary - monthlyTax - monthlyEmployeePF - monthlyCustomExpenses);
+            document.getElementById('monthly-total-pf').textContent = formatCurrency(monthlyTotalPF);
             
             // Show tax breakdown
             const breakdownHTML = taxBreakdown.map(item => 
@@ -342,49 +583,68 @@
             if (monthlyFuelAllowance > 0) {
                 // With fuel allowance
                 document.getElementById('comp-gross-with').textContent = formatCurrency(monthlySalary);
+                document.getElementById('comp-base-with').textContent = formatCurrency(monthlyBaseSalary);
                 document.getElementById('comp-medical-with').textContent = formatCurrency(monthlyMedicalAllowance);
                 document.getElementById('comp-fuel-with').textContent = formatCurrency(monthlyFuelAllowance);
+                document.getElementById('comp-pf-with').textContent = formatCurrency(monthlyEmployeePF);
+                document.getElementById('comp-expenses-with').textContent = formatCurrency(monthlyCustomExpenses);
                 document.getElementById('comp-taxable-with').textContent = formatCurrency(monthlyTaxableIncome);
                 document.getElementById('comp-tax-with').textContent = formatCurrency(monthlyTax);
-                document.getElementById('comp-net-with').textContent = formatCurrency(monthlySalary - monthlyTax);
+                document.getElementById('comp-net-with').textContent = formatCurrency(monthlySalary - monthlyTax - monthlyEmployeePF - monthlyCustomExpenses);
+                document.getElementById('comp-total-pf-with').textContent = formatCurrency(monthlyTotalPF);
                 
                 // Without fuel allowance
-                const monthlyTaxableIncomeWithoutFuel = monthlySalary - monthlyMedicalAllowance;
+                const monthlyTaxableIncomeWithoutFuel = monthlySalary - monthlyMedicalAllowance - (includePF ? monthlyEmployeePF : 0) - monthlyCustomExpenses;
                 const taxableIncomeWithoutFuel = monthlyTaxableIncomeWithoutFuel * 12;
                 const taxWithoutFuel = calculateSalariedTax(taxableIncomeWithoutFuel, taxBreakdownWithoutFuel);
                 const monthlyTaxWithoutFuel = taxWithoutFuel / 12;
                 
                 document.getElementById('comp-gross-without').textContent = formatCurrency(monthlySalary);
+                document.getElementById('comp-base-without').textContent = formatCurrency(monthlyBaseSalary);
                 document.getElementById('comp-medical-without').textContent = formatCurrency(monthlyMedicalAllowance);
                 document.getElementById('comp-fuel-without').textContent = formatCurrency(0);
+                document.getElementById('comp-pf-without').textContent = formatCurrency(monthlyEmployeePF);
+                document.getElementById('comp-expenses-without').textContent = formatCurrency(monthlyCustomExpenses);
                 document.getElementById('comp-taxable-without').textContent = formatCurrency(monthlyTaxableIncomeWithoutFuel);
                 document.getElementById('comp-tax-without').textContent = formatCurrency(monthlyTaxWithoutFuel);
-                document.getElementById('comp-net-without').textContent = formatCurrency(monthlySalary - monthlyTaxWithoutFuel);
+                document.getElementById('comp-net-without').textContent = formatCurrency(monthlySalary - monthlyTaxWithoutFuel - monthlyEmployeePF - monthlyCustomExpenses);
+                document.getElementById('comp-total-pf-without').textContent = formatCurrency(monthlyTotalPF);
                 
                 // Calculate differences
                 document.getElementById('comp-gross-diff').textContent = formatCurrency(0);
+                document.getElementById('comp-base-diff').textContent = formatCurrency(0);
                 document.getElementById('comp-medical-diff').textContent = formatCurrency(0);
                 document.getElementById('comp-fuel-diff').textContent = formatCurrency(monthlyFuelAllowance);
+                document.getElementById('comp-pf-diff').textContent = formatCurrency(0);
+                document.getElementById('comp-expenses-diff').textContent = formatCurrency(0);
                 document.getElementById('comp-taxable-diff').textContent = formatCurrency(monthlyTaxableIncome - monthlyTaxableIncomeWithoutFuel);
                 document.getElementById('comp-tax-diff').textContent = formatCurrency(monthlyTax - monthlyTaxWithoutFuel);
-                document.getElementById('comp-net-diff').textContent = formatCurrency((monthlySalary - monthlyTax) - (monthlySalary - monthlyTaxWithoutFuel));
+                document.getElementById('comp-net-diff').textContent = formatCurrency((monthlySalary - monthlyTax - monthlyEmployeePF - monthlyCustomExpenses) - (monthlySalary - monthlyTaxWithoutFuel - monthlyEmployeePF - monthlyCustomExpenses));
+                document.getElementById('comp-total-pf-diff').textContent = formatCurrency(0);
                 
                 // Calculate equivalent salary (to get same net salary without fuel allowance)
-                const targetNetSalary = monthlySalary - monthlyTax; // net salary with fuel allowance
-                const equivalentGrossSalary = calculateEquivalentSalary(targetNetSalary);
+                const targetNetSalary = monthlySalary - monthlyTax - monthlyEmployeePF - monthlyCustomExpenses; // net salary with fuel allowance
+                const equivalentGrossSalary = calculateEquivalentSalary(targetNetSalary, includePF, monthlyCustomExpenses);
+                const equivalentBaseSalary = equivalentGrossSalary * 0.7;
                 const equivalentMedicalAllowance = equivalentGrossSalary * 0.07;
-                const equivalentTaxableIncome = equivalentGrossSalary - equivalentMedicalAllowance;
+                const equivalentEmployeePF = includePF ? equivalentBaseSalary * 0.05 : 0;
+                const equivalentCompanyPF = includePF ? equivalentBaseSalary * 0.05 : 0;
+                const equivalentTotalPF = equivalentEmployeePF + equivalentCompanyPF;
+                const equivalentTaxableIncome = equivalentGrossSalary - equivalentMedicalAllowance - equivalentEmployeePF;
                 const equivalentAnnualTaxableIncome = equivalentTaxableIncome * 12;
                 const equivalentTax = calculateSalariedTax(equivalentAnnualTaxableIncome, []) / 12;
-                const equivalentNetSalary = equivalentGrossSalary - equivalentTax;
+                const equivalentNetSalary = equivalentGrossSalary - equivalentTax - equivalentEmployeePF;
                 
                 // Display equivalent salary info
                 document.getElementById('comp-gross-equivalent').textContent = formatCurrency(equivalentGrossSalary);
+                document.getElementById('comp-base-equivalent').textContent = formatCurrency(equivalentBaseSalary);
                 document.getElementById('comp-medical-equivalent').textContent = formatCurrency(equivalentMedicalAllowance);
                 document.getElementById('comp-fuel-equivalent').textContent = formatCurrency(0);
+                document.getElementById('comp-pf-equivalent').textContent = formatCurrency(equivalentEmployeePF);
                 document.getElementById('comp-taxable-equivalent').textContent = formatCurrency(equivalentTaxableIncome);
                 document.getElementById('comp-tax-equivalent').textContent = formatCurrency(equivalentTax);
                 document.getElementById('comp-net-equivalent').textContent = formatCurrency(equivalentNetSalary);
+                document.getElementById('comp-total-pf-equivalent').textContent = formatCurrency(equivalentTotalPF);
                 
                 // Show comparison section
                 document.getElementById('tax-comparison').classList.remove('hidden');
@@ -398,7 +658,7 @@
         }
         
         // Function to calculate equivalent salary needed without fuel allowance
-        function calculateEquivalentSalary(targetNetSalary) {
+        function calculateEquivalentSalary(targetNetSalary, includePF) {
             // Use binary search to find the equivalent gross salary
             let low = targetNetSalary; // Minimum possible gross (if tax was 0)
             let high = targetNetSalary * 2; // Maximum possible gross (arbitrary upper bound)
@@ -408,11 +668,13 @@
             // Binary search with 20 iterations for high precision
             for (let i = 0; i < 25; i++) {
                 const mid = (low + high) / 2;
+                const baseSalary = mid * 0.7;
                 const medicalAllowance = mid * 0.07;
-                const taxableIncome = mid - medicalAllowance;
+                const employeePF = includePF ? baseSalary * 0.05 : 0;
+                const taxableIncome = mid - medicalAllowance - employeePF;
                 const annualTaxableIncome = taxableIncome * 12;
                 const tax = calculateSalariedTax(annualTaxableIncome, []) / 12;
-                const netSalary = mid - tax;
+                const netSalary = mid - tax - employeePF;
                 
                 const diff = Math.abs(netSalary - targetNetSalary);
                 
